@@ -33,18 +33,27 @@ const FormReactSelect: React.FC<FormReactSelectProps> = ({
 					placeholder={placeholder}
 					menuPortalTarget={menuPortalTarget}
 					{...field}
-					value={() => {
-						if (!isMulti) {
-							return options.filter((item: IFormSelectOption) => item.value === field.value);
-						}
-						if (isArray(field.value)) {
-							return field.value.map((item: any) => {
-								return options.find((option: IFormSelectOption) => option.value === item);
-							});
-						}
+					value={
+						isMulti
+							? isArray(field.value)
+								? field.value.map((item: any) => {
+										return options.find((option: IFormSelectOption) => option.value === item);
+									})
+								: []
+							: options.filter((item: IFormSelectOption) => item.value === field.value)
+					}
+					// value={() => {
+					// 	if (!isMulti) {
+					// 		return options.filter((item: IFormSelectOption) => item.value === field.value);
+					// 	}
+					// 	if (isArray(field.value)) {
+					// 		return field.value.map((item: any) => {
+					// 			return options.find((option: IFormSelectOption) => option.value === item);
+					// 		});
+					// 	}
 
-						return [];
-					}}
+					// 	return [];
+					// }}
 					onChange={(option: any) => {
 						if (option === null) {
 							if (isMulti) {

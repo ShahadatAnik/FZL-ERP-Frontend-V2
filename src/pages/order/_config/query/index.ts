@@ -1,6 +1,7 @@
-import { format } from 'date-fns';
+import { IStartEndDateProps } from '@/types';
 import useTQuery from '@/hooks/useTQuery';
 
+import { formatQueryDates } from '@/utils/formatDate';
 import addUrlParams from '@/utils/routes/addUrlParams';
 
 import QK from './queryKeys';
@@ -124,21 +125,20 @@ export const useOrderFactoryByUUID = <T>(uuid: string) =>
 // 		url: addUrlParams('/public/merchandiser', { limit, page }),
 // 	});
 // };
-type IStartEndDateProps = {
-	start_date: Date;
-	end_date: Date;
-};
+// type IStartEndDateProps = {
+// 	start_date: Date | undefined;
+// 	end_date: Date | undefined;
+// };
 
-const formatDates = ({ start_date, end_date }: IStartEndDateProps) => ({
-	start_date: format(start_date, 'yyyy-MM-dd') as string,
-	end_date: format(end_date, 'yyyy-MM-dd') as string,
-});
+// const formatDates = ({ start_date, end_date }: IStartEndDateProps) => ({
+// 	start_date: start_date ? (format(start_date, 'yyyy-MM-dd') as string) : undefined,
+// 	end_date: end_date ? (format(end_date, 'yyyy-MM-dd') as string) : undefined,
+// });
 
 export const useOrderMerchandiser = <T>({ start_date, end_date }: IStartEndDateProps) => {
-	const dates = formatDates({ start_date, end_date });
 	return useTQuery<T>({
-		queryKey: QK.merchandiser(dates),
-		url: addUrlParams(`/public/merchandiser`, dates),
+		queryKey: QK.merchandiser(formatQueryDates({ start_date, end_date })),
+		url: addUrlParams(`/public/merchandiser`, formatQueryDates({ start_date, end_date })),
 	});
 };
 

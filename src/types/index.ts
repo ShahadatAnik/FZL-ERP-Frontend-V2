@@ -21,8 +21,14 @@ export type IResponse<T> = {
 };
 
 export type IParams = {
-	start_date: Date | string;
-	end_date: Date | string;
+	start_date?: Date | string | undefined;
+	end_date?: Date | string | undefined;
+	status?: boolean | undefined;
+};
+
+export type IStartEndDateProps = {
+	start_date: Date | undefined;
+	end_date: Date | undefined;
 };
 
 export type IUser = {
@@ -38,7 +44,10 @@ export type IRoute = RouteObject & {
 	page_name?: string;
 	actions?: string[];
 	disableCollapse?: boolean;
-	page_type?: 'library' | 'entry' | 'update' | 'normal' | 'custom';
+	page_type?: {
+		type: 'library' | 'entry' | 'update' | 'normal' | 'custom';
+		name: string;
+	};
 };
 
 export type ITableFacetedFilter = {
@@ -51,12 +60,20 @@ export type ITableFacetedFilter = {
 	}[];
 };
 
+export type ITableAdvanceFilter = {
+	state: boolean | undefined;
+	label: string;
+	onStateChange: () => void;
+	clear: () => void;
+};
+
 export type IToolbarOptions =
 	| 'all'
 	| 'all-filter'
 	| 'view'
 	| 'date-range'
 	| 'faceted-filter'
+	| 'advance-filter'
 	| 'export-csv'
 	| 'export-pdf'
 	| 'refresh'

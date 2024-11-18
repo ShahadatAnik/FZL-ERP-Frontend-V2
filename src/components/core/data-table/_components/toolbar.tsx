@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { IToolbarOptions } from '@/types';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { isValid } from 'date-fns';
 import { CirclePlus, SearchIcon } from 'lucide-react';
 import usePage from '@/hooks/usePage';
 import useTable from '@/hooks/useTable';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 import TableDateRange from './date-range';
 import TableExportCSV from './export-csv';
 import TableAllFilter from './filter';
+import TableAdvanceFilters from './filter/advance';
 import { TableFacetedFilter } from './filter/faceted';
 import TableRefresh from './refresh';
 import { TableRowDelete } from './row/delete';
@@ -56,11 +58,21 @@ export function TableToolbar() {
 		handleRefetch,
 		globalFilterValue,
 		facetedFilters,
+		advanceFilters,
 		isEntry,
 		start_date,
 		end_date,
 		onUpdate,
+		onClear,
+		isClear,
+		initialDateRange,
 	} = useTable();
+
+	const column = table.getColumn('created_at');
+	const columnFilterValue = column?.getFilterValue() as [Date, Date];
+
+	const startDate = start_date || columnFilterValue?.[0] || initialDateRange[0];
+	const endDate = end_date || columnFilterValue?.[1] || initialDateRange[1];
 
 	const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -85,7 +97,16 @@ export function TableToolbar() {
 				<ToolbarComponent option='view' render={() => <TableViewOptions table={table} />} />
 				<ToolbarComponent
 					option='date-range'
-					render={() => <TableDateRange start_date={start_date} end_date={end_date} onUpdate={onUpdate} />}
+					render={() => (
+						<TableDateRange
+							table={table}
+							start_date={startDate}
+							end_date={endDate}
+							onUpdate={onUpdate}
+							onClear={onClear}
+							isClear={isClear}
+						/>
+					)}
 				/>
 				<ToolbarComponent
 					option='faceted-filter'
@@ -103,6 +124,14 @@ export function TableToolbar() {
 						})
 					}
 				/>
+				<ToolbarComponent
+					option='advance-filter'
+					render={() =>
+						advanceFilters && advanceFilters?.length > 0 ? (
+							<TableAdvanceFilters filters={advanceFilters} />
+						) : null
+					}
+				/>
 				{isFiltered && (
 					<Button
 						aria-label='Reset filters'
@@ -118,11 +147,25 @@ export function TableToolbar() {
 
 				<ToolbarComponent
 					option='export-csv'
-					render={() => <TableExportCSV start_date={start_date} end_date={end_date} />}
+					render={() =>
+						isValid(startDate) &&
+						isValid(endDate) && <TableExportCSV start_date={startDate} end_date={endDate} />
+					}
 				/>
 			</div>
 		),
-		[table, facetedFilters, isFiltered, resetColumnFilters, start_date, end_date, onUpdate]
+		[
+			table,
+			facetedFilters,
+			advanceFilters,
+			isFiltered,
+			resetColumnFilters,
+			onUpdate,
+			startDate,
+			endDate,
+			onClear,
+			isClear,
+		]
 	);
 
 	/**

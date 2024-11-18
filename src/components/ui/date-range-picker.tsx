@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils';
 
 import { Button } from './button';
 import { Calendar } from './calendar';
-import { DateInput } from './date-input';
 import { Label } from './label';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { ScrollArea } from './scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import SingleDatePicker from './single-date-picker';
 import { Switch } from './switch';
 
 export interface DateRangePickerProps {
@@ -29,6 +29,8 @@ export interface DateRangePickerProps {
 	locale?: string;
 	/** Option for showing compare feature */
 	showCompare?: boolean;
+
+	onClear?: () => void;
 }
 
 const formatDate = (date: Date, locale: string = 'en-us'): string => {
@@ -91,6 +93,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 	align = 'end',
 	locale = 'en-US',
 	showCompare = false,
+	onClear,
 }): JSX.Element => {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -369,7 +372,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 			<PopoverContent align={align} className='w-auto p-0'>
 				<div className='flex'>
 					<div className='gap flex flex-col'>
-						<div className='flex flex-col items-center justify-center gap-2 border-b px-8 py-4 lg:flex-row lg:items-start'>
+						<div className='flex flex-col items-center justify-center gap-2 border-b px-8 py-3 lg:flex-row lg:items-start'>
 							{showCompare && (
 								<div className='flex items-center space-x-2 py-1 pr-4'>
 									<Switch
@@ -411,70 +414,20 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 							)}
 							<div className='flex flex-col gap-2'>
 								<div className='flex gap-2'>
-									<DateInput
-										value={range.from}
-										onChange={(date) => {
-											const toDate = range.to == null || date > range.to ? date : range.to;
-											setRange((prevRange) => ({
-												...prevRange,
-												from: date,
-												to: toDate,
-											}));
-										}}
+									<SingleDatePicker
+										disableIcon
+										className='justify-center'
+										selected={range?.from}
+										onSelect={(date) => setRange((prevRange) => ({ ...prevRange, from: date }))}
 									/>
 									<div className='py-1'>-</div>
-									<DateInput
-										value={range.to}
-										onChange={(date) => {
-											const fromDate = date < range.from ? date : range.from;
-											setRange((prevRange) => ({
-												...prevRange,
-												from: fromDate,
-												to: date,
-											}));
-										}}
+									<SingleDatePicker
+										disableIcon
+										className='justify-center'
+										selected={range?.to || new Date()}
+										onSelect={(date) => setRange((prevRange) => ({ ...prevRange, to: date }))}
 									/>
 								</div>
-								{rangeCompare != null && (
-									<div className='flex gap-2'>
-										<DateInput
-											value={rangeCompare?.from}
-											onChange={(date) => {
-												if (rangeCompare) {
-													const compareToDate =
-														rangeCompare.to == null || date > rangeCompare.to
-															? date
-															: rangeCompare.to;
-													setRangeCompare((prevRangeCompare) => ({
-														...prevRangeCompare,
-														from: date,
-														to: compareToDate,
-													}));
-												} else {
-													setRangeCompare({
-														from: date,
-														to: new Date(),
-													});
-												}
-											}}
-										/>
-										<div className='py-1'>-</div>
-										<DateInput
-											value={rangeCompare?.to}
-											onChange={(date) => {
-												if (rangeCompare && rangeCompare.from) {
-													const compareFromDate =
-														date < rangeCompare.from ? date : rangeCompare.from;
-													setRangeCompare({
-														...rangeCompare,
-														from: compareFromDate,
-														to: date,
-													});
-												}
-											}}
-										/>
-									</div>
-								)}
 							</div>
 						</div>
 
@@ -486,10 +439,10 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 										setPreset(value);
 									}}
 								>
-									<SelectTrigger className='mx-auto w-[180px]'>
+									<SelectTrigger className='mx-auto w-[200px]'>
 										<SelectValue placeholder='Select...' />
 									</SelectTrigger>
-									<SelectContent>
+									<SelectContent className='z-[999]'>
 										{PRESETS.map((preset) => (
 											<SelectItem key={preset.name} value={preset.name}>
 												{preset.label}
@@ -533,32 +486,51 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 					</div>
 				</div>
 
-				<div className='flex justify-end gap-4 border-t px-4 py-4'>
-					<Button
-						aria-label='Cancel'
-						onClick={() => {
-							setIsOpen(false);
-							resetValues();
-						}}
-						variant='outline'
-					>
-						Cancel
-					</Button>
-					<Button
-						aria-label='Apply'
-						variant={'accent'}
-						onClick={() => {
-							setIsOpen(false);
-							if (
-								!areRangesEqual(range, openedRangeRef.current) ||
-								!areRangesEqual(rangeCompare, openedRangeCompareRef.current)
-							) {
-								onUpdate?.({ range, rangeCompare });
-							}
-						}}
-					>
-						Apply
-					</Button>
+				<div className='flex items-center justify-between border-t p-3'>
+					{onClear && (
+						<Button
+							size={'sm'}
+							aria-label='Cancel'
+							onClick={() => {
+								setIsOpen(false);
+								resetValues();
+								onClear();
+							}}
+							variant='destructive'
+						>
+							Clear Filter
+						</Button>
+					)}
+
+					<div className='flex flex-1 justify-end gap-4'>
+						<Button
+							size={'sm'}
+							aria-label='Cancel'
+							onClick={() => {
+								setIsOpen(false);
+								resetValues();
+							}}
+							variant='outline'
+						>
+							Cancel
+						</Button>
+						<Button
+							size={'sm'}
+							aria-label='Apply'
+							variant={'accent'}
+							onClick={() => {
+								setIsOpen(false);
+								if (
+									!areRangesEqual(range, openedRangeRef.current) ||
+									!areRangesEqual(rangeCompare, openedRangeCompareRef.current)
+								) {
+									onUpdate?.({ range, rangeCompare });
+								}
+							}}
+						>
+							Apply
+						</Button>
+					</div>
 				</div>
 			</PopoverContent>
 		</Popover>

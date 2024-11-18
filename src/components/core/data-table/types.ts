@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IToolbarOptions } from '@/types';
-import { Column, ColumnDef } from '@tanstack/react-table';
+import { Column, ColumnDef, Table } from '@tanstack/react-table';
 import { DateRange } from 'react-day-picker';
 
 interface TStartEndDate {
@@ -10,8 +10,11 @@ interface TStartEndDate {
 
 export type TTableExportCSV = TStartEndDate;
 
-export type TTableDateRange = TStartEndDate & {
+export type TTableDateRange<T> = TStartEndDate & {
+	table: Table<T>;
 	onUpdate: (({ range }: { range: DateRange }) => void) | undefined;
+	onClear?: () => void;
+	isClear?: boolean;
 };
 
 export interface IDataTableEntryProps<TData, TValue> {

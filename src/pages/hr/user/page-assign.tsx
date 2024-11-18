@@ -91,14 +91,14 @@ const PageAssign: React.FC<IPageAssignProps> = ({ url, open, setOpen, updatedDat
 	const form = useRHF(PAGE_ASSIGN_SCHEMA);
 
 	useEffect(() => {
-		if (data?.[0] === undefined || data?.[0]['can_access'] === null) {
+		if (data === undefined || data?.['can_access'] === null) {
 			form.reset(PAGE_ASSIGN_NULL);
 			return;
 		}
 
 		const result: { [key: string]: boolean } = {};
 
-		Object.entries(data?.[0])?.forEach(([_, value]) => {
+		Object.entries(data)?.forEach(([_, value]) => {
 			const val = JSON.parse(value as string);
 
 			Object.entries(val).forEach(([k, v]: any) => {
@@ -140,9 +140,6 @@ const PageAssign: React.FC<IPageAssignProps> = ({ url, open, setOpen, updatedDat
 
 	// Submit handler
 	async function onSubmit(values: { [key: string]: boolean }) {
-		console.log({
-			values,
-		});
 		const result: { [key: string]: string[] } = {};
 
 		Object.entries(values).forEach(([key, value]) => {

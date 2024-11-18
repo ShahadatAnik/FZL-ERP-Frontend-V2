@@ -9,7 +9,7 @@ const SidebarDesktop = () => {
 		<motion.div
 			initial='open'
 			variants={{
-				open: { opacity: 1, width: '14rem' },
+				open: { opacity: 1, width: '16rem' },
 				closed: { opacity: 1, width: 0, overflow: 'hidden' },
 			}}
 			animate={isCollapsed ? 'closed' : 'open'}

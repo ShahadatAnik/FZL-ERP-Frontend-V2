@@ -1,3 +1,5 @@
+import { IParams } from '@/types';
+
 export const hrQK = {
 	all: () => ['admin'],
 
@@ -10,7 +12,8 @@ export const hrQK = {
 	designationByUUID: (uuid: string) => [...hrQK.designation(), uuid],
 
 	// user
-	user: () => [...hrQK.all(), 'user'],
-	userByUUID: (uuid: string) => [...hrQK.user(), uuid],
-	userCanAccess: (uuid: string) => [...hrQK.user(), 'can-access', uuid],
+	userDefault: () => [...hrQK.all(), 'user'],
+	user: ({ start_date, end_date, status }: IParams) => [...hrQK.userDefault(), start_date, end_date, status],
+	userByUUID: (uuid: string) => [...hrQK.userDefault(), uuid],
+	userCanAccess: (uuid: string) => [...hrQK.userDefault(), 'can-access', uuid],
 };

@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from 'react';
 import { flexRender } from '@tanstack/react-table';
 import useTable from '@/hooks/useTable';
 
@@ -14,47 +13,6 @@ import { getCommonPinningStyles } from './_helpers/getCommonPinningStyle';
 
 function DataTable() {
 	const { table, isLoading, isEntry } = useTable();
-	const { getHeaderGroups, getRowModel, getAllColumns } = table;
-
-	const renderTableBody = useCallback(() => {
-		const colSpan = getAllColumns().length;
-		const { rows } = getRowModel();
-		const hasAnyRows = rows.length > 0;
-
-		if (isLoading) {
-			return <TableSkeleton colSpan={colSpan} />;
-		}
-
-		if (!hasAnyRows) {
-			return (
-				<TableRow>
-					<TableCell colSpan={colSpan} className='h-24 animate-pulse text-center text-lg text-destructive'>
-						No Results
-					</TableCell>
-				</TableRow>
-			);
-		}
-
-		return rows.map((row) => (
-			<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-				{row.getVisibleCells().map((cell) => (
-					<TableCell
-						key={cell.id}
-						className='text-[0.75rem]'
-						style={{
-							...getCommonPinningStyles({
-								column: cell.column,
-							}),
-						}}
-					>
-						{flexRender(cell.column.columnDef.cell, cell.getContext())}
-					</TableCell>
-				))}
-			</TableRow>
-		));
-	}, [getAllColumns, getRowModel, isLoading]);
-
-	const headerGroups = useMemo(() => getHeaderGroups(), [getHeaderGroups]);
 
 	return (
 		<div>
@@ -62,9 +20,9 @@ function DataTable() {
 			<div className={cn('overflow-hidden border border-secondary/10', isEntry ? 'rounded-b-md' : 'rounded-md')}>
 				<TableComponent>
 					<TableHeader>
-						{headerGroups.map(({ id, headers }) => (
-							<TableRow key={id}>
-								{headers.map((header) => {
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => {
 									const content = header.column.columnDef.header;
 									return (
 										<TableHead
@@ -93,7 +51,34 @@ function DataTable() {
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody className='divide-y-[1px] divide-secondary/10'>{renderTableBody()}</TableBody>
+					<TableBody className='divide-y-[1px] divide-secondary/10'>
+						{isLoading ? (
+							<TableSkeleton colSpan={table.getAllColumns().length} />
+						) : table.getRowModel().rows?.length ? (
+							table.getRowModel().rows.map((row) => (
+								<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell
+											key={cell.id}
+											style={{
+												...getCommonPinningStyles({
+													column: cell.column,
+												}),
+											}}
+										>
+											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+										</TableCell>
+									))}
+								</TableRow>
+							))
+						) : (
+							<TableRow>
+								<TableCell colSpan={table.getAllColumns().length} className='h-24 text-center'>
+									No results.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
 				</TableComponent>
 
 				<TablePagination />

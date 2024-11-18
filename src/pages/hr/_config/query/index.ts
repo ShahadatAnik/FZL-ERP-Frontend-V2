@@ -1,12 +1,15 @@
+import { IParams } from '@/types';
 import useTQuery from '@/hooks/useTQuery';
+
+import addUrlParams from '@/utils/routes/addUrlParams';
 
 import { hrQK } from './queryKeys';
 
 // * User
-export const useHrUsers = <T>() =>
+export const useHrUsers = <T>(params: IParams) =>
 	useTQuery<T>({
-		queryKey: hrQK.user(),
-		url: '/hr/user',
+		queryKey: hrQK.user(params),
+		url: addUrlParams('/hr/user', params),
 	});
 
 export const useHrUsersByUUID = <T>(uuid: string) =>

@@ -16,7 +16,7 @@ const AddOrUpdate = lazy(() => import('./add-or-update'));
 const DeleteModal = lazy(() => import('@core/modal/delete'));
 
 const Merchandiser = () => {
-	const { start_date, end_date, onUpdate } = useDateRange();
+	const { start_date, end_date, onUpdate, onClear, isClear } = useDateRange();
 	const { data, isLoading, url, deleteData, postData, updateData, refetch } = useOrderMerchandiser<
 		IMerchandiserData[]
 	>({ start_date, end_date });
@@ -65,6 +65,8 @@ const Merchandiser = () => {
 				start_date={start_date}
 				end_date={end_date}
 				onUpdate={onUpdate}
+				onClear={onClear}
+				isClear={isClear}
 			>
 				{renderSuspenseModals([
 					<AddOrUpdate

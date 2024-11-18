@@ -12,7 +12,7 @@ export const createApi = ({ contentType }: { contentType: AxiosHeaderValue }) =>
 	});
 
 	api.interceptors.request.use(
-		async (config) => {
+		(config) => {
 			const token = Cookies?.get('auth');
 
 			if (token) {
